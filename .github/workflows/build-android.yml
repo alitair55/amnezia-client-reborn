@@ -1,14 +1,11 @@
 name: Build Android APK
-
 on:
   push:
     branches: [ dev ]
   workflow_dispatch:
-
 jobs:
   build-android:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -56,9 +53,6 @@ jobs:
           pip install conan
           conan profile detect --force
 
-      - name: Find qt-cmake
-        run: find /home/runner/work -name "qt-cmake" 2>/dev/null
-
       - name: Configure
         run: |
           export ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/25.2.9519653
@@ -69,8 +63,29 @@ jobs:
 
       - name: Build
         run: cmake --build build-android --parallel
+
+      - name: Sign APK
+        run: |
+          APK=$(find build-android -name "*.apk" | head -1)
+          echo "Found APK: $APK"
+          keytool -genkeypair -v \
+            -keystore debug.keystore \
+            -alias androiddebugkey \
+            -keyalg RSA -keysize 2048 \
+            -validity 10000 \
+            -storepass android \
+            -keypass android \
+            -dname "CN=Android Debug,O=Android,C=US"
+          $ANDROID_SDK_ROOT/build-tools/33.0.2/apksigner sign \
+            --ks debug.keystore \
+            --ks-key-alias androiddebugkey \
+            --ks-pass pass:android \
+            --key-pass pass:android \
+            --out signed.apk \
+            "$APK"
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: AmneziaVPN-android
-          path: build-android/**/*.apk
+          path: signed.apk
