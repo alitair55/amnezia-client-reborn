@@ -3,7 +3,7 @@ name: Build Android APK
 on:
   push:
     branches: [ dev ]
-  workflow_dispatch:  # кнопка ручного запуска
+  workflow_dispatch:
 
 jobs:
   build-android:
@@ -39,7 +39,9 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: 'stable'
-      - run: |
+
+      - name: Setup gomobile
+        run: |
           go install golang.org/x/mobile/cmd/gomobile@latest
           gomobile init
 
@@ -48,6 +50,9 @@ jobs:
           wget -q https://github.com/Kitware/CMake/releases/download/v3.25.3/cmake-3.25.3-linux-x86_64.sh
           chmod +x cmake-3.25.3-linux-x86_64.sh
           sudo ./cmake-3.25.3-linux-x86_64.sh --skip-license --prefix=/usr/local
+
+      - name: Find qt-cmake
+        run: find /home/runner/work -name "qt-cmake" 2>/dev/null
 
       - name: Configure
         run: |
