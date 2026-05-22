@@ -51,6 +51,11 @@ jobs:
           chmod +x cmake-3.25.3-linux-x86_64.sh
           sudo ./cmake-3.25.3-linux-x86_64.sh --skip-license --prefix=/usr/local
 
+      - name: Install Conan
+        run: |
+          pip install conan
+          conan profile detect --force
+
       - name: Find qt-cmake
         run: find /home/runner/work -name "qt-cmake" 2>/dev/null
 
