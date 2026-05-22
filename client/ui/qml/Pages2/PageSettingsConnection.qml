@@ -64,14 +64,9 @@ PageType {
 
                 text: qsTr("Use AmneziaDNS")
                 descriptionText: qsTr("If AmneziaDNS is installed on the server")
-
-                checked: SettingsController.isAmneziaDnsEnabled()
-                onToggled: function() {
-                    if (checked !== SettingsController.isAmneziaDnsEnabled()) {
-                        SettingsController.toggleAmneziaDns(checked)
-                    }
-                }
-            }
+                checked: false        // всегда выключен
+                enabled: false        // нельзя нажать
+                visible: true         // или false, если хочешь скрыть совсем
 
             DividerType {}
 
