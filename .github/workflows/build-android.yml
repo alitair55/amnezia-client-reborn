@@ -30,7 +30,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.6.2'
+          version: '6.8.0'
           target: android
           arch: android_arm64_v8a
           modules: 'qt5compat qtshadertools qtimageformats qtmultimedia qtremoteobjects'
