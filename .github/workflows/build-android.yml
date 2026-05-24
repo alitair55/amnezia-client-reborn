@@ -3,6 +3,7 @@ on:
   push:
     branches: [ dev ]
   workflow_dispatch:
+
 jobs:
   build-android:
     runs-on: ubuntu-latest
@@ -21,16 +22,30 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android SDK platform 33
-        run: sdkmanager "platforms;android-33" "build-tools;33.0.2" "ndk;26.3.11579264"
+      - name: Install Android SDK platform and NDK
+        run: sdkmanager "platforms;android-28" "build-tools;33.0.2" "ndk;27.0.11718014"
 
-      - name: Install Qt
+      - name: Install desktop Qt (host)
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.8.0'
+          version: '6.10.3'
+          host: linux
+          target: desktop
+          arch: linux_gcc_64
+          modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+          dir: ${{ runner.temp }}
+          set-env: true
+
+      - name: Install Android Qt arm64
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.10.3'
+          host: linux
           target: android
           arch: android_arm64_v8a
-          modules: 'qt5compat qtshadertools qtimageformats qtmultimedia qtremoteobjects'
+          modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+          dir: ${{ runner.temp }}
+          set-env: true
 
       - name: Install Go and gomobile
         uses: actions/setup-go@v5
@@ -50,16 +65,16 @@ jobs:
 
       - name: Install Conan
         run: |
-          pip install conan
+          pip install "conan==2.28.0"
           conan profile detect --force
 
       - name: Configure
         run: |
-          export ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/26.3.11579264
+          export ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/27.0.11718014
           $QT_ROOT_DIR/bin/qt-cmake . -B build-android \
             -DCMAKE_BUILD_TYPE=Release \
             -DQT_HOST_PATH=$QT_HOST_PATH \
-            -DQT_ANDROID_BUILD_ALL_ABIS=ON
+            -DANDROID_PLATFORM=android-28
 
       - name: Build
         run: cmake --build build-android --parallel
